@@ -190,7 +190,7 @@ class CMB2_Field {
 	public function _data( $var, $key = '' ) {
 		$vars = $this->$var;
 		if ( $key ) {
-			return isset( $vars[ $key ] ) ? $vars[ $key ] : false;
+			return array_key_exists( $key, $vars ) ? $vars[ $key ] : false;
 		}
 		return $vars;
 	}
@@ -1165,6 +1165,7 @@ class CMB2_Field {
 			'display_cb'        => array( $this, 'display_value_callback' ),
 			'label_cb'          => 'title' != $args['type'] ? array( $this, 'label' ) : '',
 			'column'            => false,
+			'show_in_rest'      => null,
 		) );
 
 		// default param can be passed a callback as well
