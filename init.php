@@ -151,9 +151,6 @@ if ( ! class_exists( 'CMB2_Bootstrap_222_Trunk', false ) ) {
 			// Kick the whole thing off
 			require_once 'bootstrap.php';
 			cmb2_bootstrap();
-
-			// hook up the CMB rest endpoint class
-			add_action( 'rest_api_init', array( $this, 'cmb2_rest_routes' ), 0 );
 		}
 
 		/**
@@ -178,18 +175,6 @@ if ( ! class_exists( 'CMB2_Bootstrap_222_Trunk', false ) ) {
 				load_textdomain( 'cmb2', $mofile );
 			}
 
-		}
-
-
-		/**
-		 * cmb2_rest_routes function.
-		 *
-		 * @access public
-		 * @return void
-		 */
-		public function cmb2_rest_routes() {
-			$controller = new CMB2_REST_Endpoints;
-			$controller->register_routes();
 		}
 
 	}
