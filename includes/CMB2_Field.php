@@ -1134,6 +1134,19 @@ class CMB2_Field {
 	}
 
 	/**
+	 * Store JS dependencies as part of the field args.
+	 * @since 2.2.0
+	 * @param array $dependencies Dependies to register for this field.
+	 */
+	public function add_js_dependencies( $dependencies = array() ) {
+		foreach ( (array) $dependencies as $dependency ) {
+			$this->args['js_dependencies'][ $dependency ] = $dependency;
+		}
+
+		CMB2_JS::add_dependencies( $dependencies );
+	}
+
+	/**
 	 * Get CMB2_Field default value, either from default param or default_cb param.
 	 *
 	 * @since  0.2.2
@@ -1191,6 +1204,7 @@ class CMB2_Field {
 			'label_cb'          => 'title' != $args['type'] ? array( $this, 'label' ) : '',
 			'column'            => false,
 			'show_in_rest'      => null,
+			'js_dependencies'   => array(),
 		) );
 
 		// default param can be passed a callback as well
