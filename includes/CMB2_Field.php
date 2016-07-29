@@ -864,7 +864,6 @@ class CMB2_Field extends CMB2_Base {
 			$added_classes = is_array( $added_classes ) ? implode( ' ', $added_classes ) : (string) $added_classes;
 		}
 
-
 		if ( $added_classes ) {
 			$classes[] = esc_attr( $added_classes );
 		}
@@ -1059,7 +1058,7 @@ class CMB2_Field extends CMB2_Base {
 	 * @since 1.1.0
 	 * @param array $args Metabox field config array
 	 */
-	public function _set_field_defaults( $args, $blah ) {
+	public function _set_field_defaults( $args ) {
 
 		/*
 		 * Deprecated parameters:
@@ -1102,8 +1101,8 @@ class CMB2_Field extends CMB2_Base {
 			'display_cb'        => array( $this, 'display_value_callback' ),
 			'label_cb'          => 'title' != $args['type'] ? array( $this, 'label' ) : '',
 			'column'            => false,
-			'show_in_rest'      => null,
 			'js_dependencies'   => array(),
+			'show_in_rest'      => null,
 		) );
 
 		/*

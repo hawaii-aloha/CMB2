@@ -14,13 +14,6 @@
 class CMB2_hookup extends CMB2_Hookup_Base {
 
 	/**
-	 * Array of all hooks done (to be run once)
-	 * @var   array
-	 * @since 2.0.0
-	 */
-	protected static $hooks_completed = array();
-
-	/**
 	 * Only allow JS registration once
 	 * @var   bool
 	 * @since 2.0.7
@@ -33,12 +26,6 @@ class CMB2_hookup extends CMB2_Hookup_Base {
 	 * @since 2.0.7
 	 */
 	protected static $css_registration_done = false;
-
-	/**
-	 * @var   CMB2 object
-	 * @since 2.0.2
-	 */
-	protected $cmb;
 
 	/**
 	 * CMB taxonomies array for term meta
