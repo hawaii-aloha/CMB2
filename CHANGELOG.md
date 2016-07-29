@@ -5,21 +5,55 @@ All notable changes to this project will be documented in this file.
 
 ### Enhancements
 
-* You can now set admin post-listing columns with an extra field parameter, `'column' => true,`. If you want to dictate what position the column is, use `'column' => array( 'position' => 2 ),`. If you want to dictate the column title (instead of using the field `'name'` value), use `'column' => array( 'name' => 'My Column' ),`. If you need to specify the column display callback, set the `'display_cb'` parameter to [a callback function](https://github.com/WebDevStudios/CMB2/wiki/Field-Parameters#render_row_cb).
-* Updated Datepicker styles using JJJ's "jQuery UI Datepicker CSS for WordPress", so props Props [@stuttter](https://github.com/stuttter), [@johnjamesjacoby](https://github.com/johnjamesjacoby).
-* Implement CMB2_Ajax as a singleton. Props [jrfnl](https://github.com/jrfnl) ([#602](https://github.com/WebDevStudios/CMB2/pull/602)).
+* Small string improvement, move a period inside the translatable string. Props [@pedro-mendonca](https://github.com/pedro-mendonca) ([#672](https://github.com/WebDevStudios/CMB2/pull/672)).
+* Introduce the `'save_field'` boolean field parameter for disabling the saving of a field. Useful if you want to display the value of another field, or use a disabled/read-only field. Props [@jamesgol](https://github.com/jamesgol) ([#674](https://github.com/WebDevStudios/CMB2/pull/674), [#346](https://github.com/WebDevStudios/CMB2/issues/346), [#500](https://github.com/WebDevStudios/CMB2/issues/500)).
+* Update docblocks for `CMB2_Field::save_field_from_data()` and `CMB2_Field::save_field()`. Props [@jamesgol](https://github.com/jamesgol) ([#675](https://github.com/WebDevStudios/CMB2/pull/675).
+* More javascript events tied to the media modal actions (related to the `'file'` and '`file_list'` fields). `'cmb_media_modal_init'`, `'cmb_media_modal_open'`, and `'cmb_media_modal_select'`.
+* All CMB2 JS events now also get the CMB2 JS object passed in the list of arguments.
+* CMB2 JS object is now instantiated without stomping existing object, to enable extending.
+* Change `'row_classes'` to just `'classes'`, to mirror the metabox `'classes'` property. Also now accepts a `'classes_cb'` parameter for specifying a callback which returns a string or array. The callback will receive `$field_args` as the first argument, and the CMB2_Field `$field` object as the second argument. (`'row_classes'` will continue to work, but is deprecated)
+
+
+### Bug Fixes
+
+* If custom field types use a method and the Type object has not been instantiated, Try to guess the Type object and instantiate, then throw a `_doing_it_wrong` notice.
+* Normalize WordPress root path (`ABSPATH`) and theme rooth path (`get_theme_root()`). Props [@rianbotha](https://github.com/rianbotha) ([#677](https://github.com/WebDevStudios/CMB2/pull/677), [#676](https://github.com/WebDevStudios/CMB2/pull/676)).
+
+## 2.2.2.1 - 2016-06-27
+
+### Bug Fixes
+
+* Fix issue that kept CMB2 stylesheet from being enqueued when using the [options-page snippets](https://github.com/WebDevStudios/CMB2-Snippet-Library/tree/master/options-and-settings-pages).
+* Fix issue which caused the CMB2 column display styles to be enqueued in the wrong pages. Now only enqueues on admin pages with columns.
+
+## 2.2.2 - 2016-06-27
+
+### Enhancements
+
+* You can now set admin post-listing columns with an extra field parameter, `'column' => true,`. If you want to dictate what position the column is, use `'column' => array( 'position' => 2 ),`. If you want to dictate the column title (instead of using the field `'name'` value), use `'column' => array( 'name' => 'My Column' ),`. If you need to specify the column display callback, set the `'display_cb'` parameter to [a callback function](https://github.com/WebDevStudios/CMB2/wiki/Field-Parameters#render_row_cb). Columns work for post (all post-types), comment, user, and term object types.
+* Updated Datepicker styles using JJJ's "jQuery UI Datepicker CSS for WordPress", so props Props [@stuttter](https://github.com/stuttter), [@johnjamesjacoby](https://github.com/johnjamesjacoby). Also cleaned up the timepicker styles (specifically the buttons) to more closely align with the datepicker and WordPress styles.
 * CMB2 is now a lot more intelligent about where it is located in your installation. This update should solve almost all of the reasons to use the `'cmb2_meta_box_url'` filter (thought it will continue to work as expected). ([#27](https://github.com/WebDevStudios/CMB2/issues/27), [#118](https://github.com/WebDevStudios/CMB2/issues/118), [#432](https://github.com/WebDevStudios/CMB2/issues/432), [related wiki item](https://github.com/WebDevStudios/CMB2/wiki/Troubleshooting#cmb2-urls-issues))
+* Implement CMB2_Ajax as a singleton. Props [jrfnl](https://github.com/jrfnl) ([#602](https://github.com/WebDevStudios/CMB2/pull/602)).
 * Add `classes` and `classes_cb` CMB2 box params which allows you to add additional classes to the cmb-wrap. The `classes` parameter can take a string or array, and the `classes_cb` takes a callback which returns a string or array. The callback will receive `$cmb` as an argument. These classes are also passed through a new filter, `'cmb2_wrap_classes'`, which receives the array of classes as the first argument, and the CMB2 object as the second. Reported/requested in [#364](https://github.com/WebDevStudios/CMB2/issues/364#issuecomment-213223692).
 * Make the `'title'` field type accept extra arguments. Props [@vladolaru](https://github.com/vladolaru), [@pixelgrade](https://github.com/pixelgrade) ([#656](https://github.com/WebDevStudios/CMB2/pull/656)).
 * Updated `cmb2_get_oembed()` function to NOT return the "remove" link, as it's intended for outputting the oembed only. **This is a backwards-compatibility concern.** If you were depending on the "remove" link, use `cmb2_ajax()->get_oembed( $args )` instead.
 * New function, `cmb2_do_oembed()`', which is hooked to `'cmb2_do_oembed'`, so you can use `do_action( 'cmb2_do_oembed', $args )` in your themes without `function_exists()` checks.
+* New method, `CMB2:set_prop( $property, $value )`, for setting a CMB2 metabox object property.
+* The `CMB2_Field` object instances will now have a `cmb_id` property and a `get_cmb` method to enable access to the field's `CMB2` parent object's instance, in places like field callbacks and filters (e.g. `$cmb = $field->get_cmb();`).
+* Add a `data-fieldtype` attribute to the field rows for simpler identification in Javascript.
+* Moved each type in `CMB2_Types` to it's own class so that each field type can handle it's own field display, and added the infrastructure to maintainn back-compatibility.
+* New `CMB2_Utils` methods, `notempty()` and `filter_empty()`, both of which consider `null`, `''` and `false` as empty, but allow `0` (for saving `0` as a field value).
+* New `CMB2_Utils` public methods, `get_url_from_dir()`, `get_file_ext()`, `get_file_name_from_path()`, and `wp_at_least()`.
+* Add a `cmb_pre_init` Javascript event to allow overriding CMB2 defaults via JS.
 
 ### Bug Fixes
 * Fix issue with 'default' callback not being applied in all instances. Introduced new `CMB2_Field::get_default()` method, and `'default_cb'` field parameter. Using the `'default'` field parameter with a callback will be deprecated in the next few releases. ([#572](https://github.com/WebDevStudios/CMB2/issues/572)).
 * Be sure to call `CMB2_Field::row_classes()` for group field rows. Also, update CSS to use the "cmb-type-group" classname instead of "cmb-repeat-group-wrap".
 * Introduce new `'text'` and `'text_cb'` field parameters for overriding CMB2 text strings instead of using the `'options'` array. ([#630](https://github.com/WebDevStudios/CMB2/pull/630))
 * Fix bug where the value of '0' could not be saved in group fields.
+* Fix bug where a serialized empty array value in the database for a repeatable field would output as "Array".
 * Allow for optional/empty money field. Props [@jrfnl](https://github.com/jrfnl) ([#577](https://github.com/WebDevStudios/CMB2/pull/577)).
+* The `CMB2::$updated` parameter (which contains field ids for all fields updated during a save) now also correctly adds group field ids to the array.
 
 ## 2.2.1 - 2016-02-29
 

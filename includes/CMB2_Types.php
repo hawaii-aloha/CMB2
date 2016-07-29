@@ -38,12 +38,12 @@ class CMB2_Types {
 	}
 
 	/**
-	 * Default fallback. Allows rendering fields via "cmb2_render_$name" hook
-	 * @since  1.0.0
-	 * @param  string $name      Non-existent method name
-	 * @param  array  $arguments All arguments passed to the method
+	 * Default fallback. Allows rendering fields via "cmb2_render_$fieldtype" hook
+	 * @since 1.0.0
+	 * @param string $fieldtype Non-existent field type name
+	 * @param array  $arguments All arguments passed to the method
 	 */
-	public function __call( $name, $arguments ) {
+	public function __call( $fieldtype, $arguments ) {
 		$proxied = array(
 			'get_object_terms' => array(),
 			'is_valid_img_ext' => false,
@@ -56,15 +56,15 @@ class CMB2_Types {
 			'file_status_output' => '',
 			'parse_picker_options' => array(),
 		);
-		if ( isset( $proxied[ $name ] ) ) {
+		if ( isset( $proxied[ $fieldtype ] ) ) {
 			// Proxies the method call to the CMB2_Type object
-			return $this->proxy_method( $name, $proxied[ $name ], $arguments );
+			return $this->proxy_method( $fieldtype, $proxied[ $fieldtype ], $arguments );
 		}
 
 		/**
 		 * Pass non-existent field types through an action
 		 *
-		 * The dynamic portion of the hook name, $name, refers to the field type.
+		 * The dynamic portion of the hook name, $fieldtype, refers to the field type.
 		 *
 		 * @param array  $field              The passed in `CMB2_Field` object
 		 * @param mixed  $escaped_value      The value of this field escaped.
@@ -77,7 +77,7 @@ class CMB2_Types {
 		 *                                   but could also be `comment`, `user` or `options-page`.
 		 * @param object $field_type_object  This `CMB2_Types` object
 		 */
-		do_action( "cmb2_render_$name", $this->field, $this->field->escaped_value(), $this->field->object_id, $this->field->object_type, $this );
+		do_action( "cmb2_render_$fieldtype", $this->field, $this->field->escaped_value(), $this->field->object_id, $this->field->object_type, $this );
 	}
 
 	/**
@@ -113,13 +113,70 @@ class CMB2_Types {
 	 * @return mixed           Results from called method.
 	 */
 	protected function proxy_method( $method, $default, $args = array() ) {
+		if ( ! is_object( $this->type ) ) {
+			$this->guess_type_object( $method );
+		}
+
 		if ( is_object( $this->type ) && method_exists( $this->type, $method ) ) {
+
 			return empty( $args )
 				? $this->type->$method()
 				: call_user_func_array( array( $this->type, $method ), $args );
 		}
 
 		return $default;
+	}
+
+	/**
+	 * If no CMB2_Types::$type object is initiated when a proxy method is called, it means
+	 * it's a custom field type (which SHOULD be instantiating a Type), but let's try and
+	 * guess the type object for them, instantiate it, and throw a _doing_it_wrong notice.
+	 *
+	 * @since  2.2.3
+	 *
+	 * @param string $method  Method attempting to be called on the CMB2_Type object.
+	 */
+	protected function guess_type_object( $method ) {
+		// Try to "guess" the Type object based on the method requested.
+		switch ( $method ) {
+			case 'select_option':
+			case 'list_input':
+			case 'list_input_checkbox':
+			case 'concat_items':
+				$this->type = new CMB2_Type_Select( $this );
+				break;
+			case 'is_valid_img_ext':
+			case 'img_status_output':
+			case 'file_status_output':
+				$this->type = new CMB2_Type_File_Base( $this );
+				break;
+			case 'parse_picker_options':
+				$this->type = new CMB2_Type_Text_Date( $this );
+				break;
+			case 'get_object_terms':
+			case 'get_terms':
+				$this->type = new CMB2_Type_Taxonomy_Multicheck( $this );
+				break;
+			case 'date_args':
+			case 'time_args':
+				$this->type = new CMB2_Type_Text_Datetime_Timestamp( $this );
+				break;
+			case 'parse_args':
+				$this->type = new CMB2_Type_Text( $this );
+				break;
+		}
+
+		// Then, let's throw a debug _doing_it_wrong notice.
+
+		$message = array( sprintf( __( 'Custom field types require a Type object instantiation to use this method. This method was called by the \'%s\' field type.' ), $this->field->type() ) );
+
+		$message[] = is_object( $this->type )
+			? __( 'That field type may not work as expected.', 'cmb2' )
+			: __( 'That field type will not work as expected.', 'cmb2' );
+
+		$message[] = __( 'See: https://github.com/mustardBees/cmb-field-select2/pull/34w for more information about this change.', 'cmb2' );
+
+		_doing_it_wrong( __CLASS__ . '::' . $method, implode( ' ', $message ), '2.2.2' );
 	}
 
 	/**
@@ -342,11 +399,16 @@ class CMB2_Types {
 	}
 
 	public function hidden() {
-		return $this->input( array(
+		$args = array(
 			'type' => 'hidden',
 			'desc' => '',
-			'class' => false,
-		) );
+			'class' => 'cmb2-hidden',
+		);
+		if ( $this->field->group ) {
+			$args['data-groupid'] = $this->field->group->id();
+			$args['data-iterator'] = $this->iterator;
+		}
+		return $this->input( $args );
 	}
 
 	public function text_small() {

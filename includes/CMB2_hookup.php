@@ -48,13 +48,6 @@ class CMB2_hookup extends CMB2_Hookup_Base {
 	protected $taxonomies = array();
 
 	/**
-	 * The object type we are performing the hookup for
-	 * @var   string
-	 * @since 2.0.9
-	 */
-	protected $object_type = 'post';
-
-	/**
 	 * Custom field columns.
 	 * @var   array
 	 * @since 2.2.2
@@ -98,9 +91,7 @@ class CMB2_hookup extends CMB2_Hookup_Base {
 			$this->once( 'admin_enqueue_scripts', array( __CLASS__, 'register_scripts' ), 8 );
 			$this->once( 'admin_enqueue_scripts', array( $this, 'do_scripts' ) );
 
-			if ( $this->cmb->has_columns && $this->cmb->prop( 'cmb_styles' ) ) {
-				self::enqueue_cmb_css( 'cmb2-display-styles' );
-			}
+			$this->maybe_enqueue_column_display_styles();
 		}
 	}
 
@@ -607,6 +598,22 @@ class CMB2_hookup extends CMB2_Hookup_Base {
 	}
 
 	/**
+	 * Enqueues the 'cmb2-display-styles' if the conditions match (has columns, on the right page, etc).
+	 * @since  2.2.2.1
+	 */
+	protected function maybe_enqueue_column_display_styles() {
+		global $pagenow;
+		if (
+			$pagenow
+			&& $this->cmb->has_columns
+			&& $this->cmb->prop( 'cmb_styles' )
+			&& in_array( $pagenow, array( 'edit.php', 'users.php', 'edit-comments.php', 'edit-tags.php' ), 1 )
+			) {
+			self::enqueue_cmb_css( 'cmb2-display-styles' );
+		}
+	}
+
+	/**
 	 * Includes CMB2 styles
 	 * @since  2.0.0
 	 */
@@ -616,7 +623,12 @@ class CMB2_hookup extends CMB2_Hookup_Base {
 		}
 
 		self::register_styles();
-		return wp_enqueue_style( $handle );
+
+		/*
+		 * White list the options as this method can be used as a hook callback
+		 * and have a different argument passed.
+		 */
+		return wp_enqueue_style( 'cmb2-display-styles' === $handle ? $handle : 'cmb2-styles' );
 	}
 
 	/**
