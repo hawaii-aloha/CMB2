@@ -77,7 +77,7 @@ class CMB2_Types {
 		 *                                   but could also be `comment`, `user` or `options-page`.
 		 * @param object $field_type_object  This `CMB2_Types` object
 		 */
-		do_action( "cmb2_render_$fieldtype", $this->field, $this->field->escaped_value(), $this->field->object_id, $this->field->object_type, $this );
+		do_action( "cmb2_render_{$fieldtype}", $this->field, $this->field->escaped_value(), $this->field->object_id, $this->field->object_type, $this );
 	}
 
 	/**
@@ -187,7 +187,7 @@ class CMB2_Types {
 	 * @return string            Text
 	 */
 	public function _text( $text_key, $fallback = '' ) {
-		return $this->field->string( $text_key, $fallback );
+		return $this->field->get_string( $text_key, $fallback );
 	}
 
 	/**
