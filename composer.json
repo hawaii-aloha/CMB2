@@ -12,7 +12,7 @@
     ],
     "keywords": ["wordpress", "plugin", "metabox"],
     "homepage": "https://github.com/WebDevStudios/CMB2",
-    "type": "wordpress-plugin",
+    "type": "library",
     "support": {
         "issues": "https://github.com/WebDevStudios/CMB2/issues",
         "source": "http://wordpress.org/support/plugin/cmb2"
